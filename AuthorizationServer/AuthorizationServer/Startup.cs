@@ -22,6 +22,7 @@ namespace AuthorizationServer
             // IdentityServer4 configuration
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
+                .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryClients(Config.GetClients())
                 .AddTestUsers(Config.GetUsers());
