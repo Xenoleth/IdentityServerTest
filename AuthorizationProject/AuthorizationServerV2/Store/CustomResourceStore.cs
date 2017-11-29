@@ -59,7 +59,7 @@ namespace AuthorizationServerV2.Store
             });
         }
 
-        public Task<Resources> GetAllResources()
+        public Task<Resources> GetAllResourcesAsync()
         {
             return Task.Run(() =>
             {

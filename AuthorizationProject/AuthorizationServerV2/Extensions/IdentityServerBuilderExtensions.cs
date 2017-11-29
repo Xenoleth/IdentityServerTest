@@ -1,8 +1,9 @@
-﻿using AuthorizationServerV2.Repository;
+﻿using AuthorizationServerV2.External;
+using AuthorizationServerV2.Repository;
 using AuthorizationServerV2.Store;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Identity.MongoDB;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -18,20 +19,27 @@ namespace AuthorizationServerV2.Extensions
             return builder;
         }
 
-        public static IIdentityServerBuilder AddMongoDbForAspIdentity<TIdentity, TRole>(this IIdentityServerBuilder builder, IConfiguration configurationRoot) 
-            where TIdentity : IdentityUser where TRole : IdentityRole
-        {            
-            var configurationOptions = configurationRoot.Get<ConfigurationOptions>();
-            var client = new MongoClient(configurationOptions.MongoConnection);
-            var database = client.GetDatabase(configurationOptions.MongoDatabaseName);
+        public static IIdentityServerBuilder AddMongoDbForAspIdentity<TIdentity, TRole>(this IIdentityServerBuilder builder, IConfiguration configuration)
+            where TIdentity : External.IdentityUser where TRole : External.IdentityRole
+        {
+            var configurationOptions = configuration.Get<ConfigurationOptions>();
+            // TODO: Inject connectionString and dbName
+            var client = new MongoClient(
+                //configurationOptions.MongoConnection
+                "mongodb://localhost:27017"
+                );
+            var database = client.GetDatabase(
+                //configurationOptions.MongoDatabaseName
+                "testDatabase"
+                );
 
             // Changed to return UserStore instead of interface IUserStore to work
-            builder.Services.AddSingleton<UserStore<TIdentity>>(x =>
+            builder.Services.AddSingleton<IUserStore<TIdentity>>(x =>
             {
                 var usersCollection = database.GetCollection<TIdentity>("Identity_Users");
                 IndexChecks.EnsureUniqueIndexOnNormalizedEmail(usersCollection);
                 IndexChecks.EnsureUniqueIndexOnNormalizedUserName(usersCollection);
-                return new UserStore<TIdentity>(usersCollection);
+                return new External.UserStore<TIdentity>(usersCollection);
             });
 
             // Changed to return RoleStore instead of interface IRoleStore to work
@@ -41,8 +49,10 @@ namespace AuthorizationServerV2.Extensions
                 IndexChecks.EnsureUniqueIndexOnNormalizedRoleName(rolesCollection);
                 return new RoleStore<TRole>(rolesCollection);
             });
+            // TODO: Add password settings, etc.
+            // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity-configuration?tabs=aspnetcore2x
             builder.Services.AddIdentity<TIdentity, TRole>();
-            
+
             return builder;
         }
 

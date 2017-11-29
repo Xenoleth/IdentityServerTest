@@ -7,32 +7,24 @@ using System.Linq;
 
 namespace AuthorizationServerV2.Repository
 {
-    /// <summary>
-    /// Provides functionality  to persist "IdentityServer4.Models" into a given MongoDB
-    /// </summary>
     public class MongoRepository : IRepository
     {
-        protected static IMongoClient _client;
-        protected static IMongoDatabase _database;
+        private readonly IMongoClient _client;
+        public readonly IMongoDatabase _database;
 
-
-        /// <summary>
-        /// This Contructor leverages  .NET Core built-in DI
-        /// </summary>
-        /// <param name="optionsAccessor">Injected by .NET Core built-in Depedency Injection</param>
-        public MongoRepository(IOptions<ConfigurationOptions> optionsAccessor)
+        public MongoRepository(
+            // TODO: Extract options
+            //IOptions<ConfigurationOptions> optionsAccessor
+            )
         {
-            var configurationOptions = optionsAccessor.Value;
+            //var configurationOptions = optionsAccessor.Value;
 
-            _client = new MongoClient(configurationOptions.MongoConnection);
-            _database = _client.GetDatabase(configurationOptions.MongoDatabaseName);
-
+            //_client = new MongoClient(configurationOptions.MongoConnection);
+            //_database = _client.GetDatabase(configurationOptions.MongoDatabaseName);
+            this._client = new MongoClient("mongodb://localhost:27017");
+            this._database = this._client.GetDatabase("testDatabase");
         }
 
-        /// <summary>
-        /// Get Database connection
-        /// </summary>
-        /// <returns></returns>
         public IMongoDatabase GetDatabase()
         {
             return _database;
@@ -76,8 +68,5 @@ namespace AuthorizationServerV2.Repository
         {
             _database.GetCollection<T>(typeof(T).Name).InsertMany(items);
         }
-
-
-
     }
 }
