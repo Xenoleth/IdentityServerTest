@@ -1,9 +1,15 @@
 ﻿using AuthorizationServerV2.Extensions;
+using AuthorizationServerV2.External;
+using AuthorizationServerV2.Repository;
 using AuthorizationServerV2.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Cors.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 namespace AuthorizationServerV2
 {
@@ -18,20 +24,30 @@ namespace AuthorizationServerV2
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.WithOrigins("http://localhost:5003/")
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });           
 
-            services.AddIdentityServer(options =>
-                {
-                    options.Events.RaiseSuccessEvents = true;
-                    options.Events.RaiseFailureEvents = true;
-                    options.Events.RaiseErrorEvents = true;
-                })
+            services.AddIdentityServer()
                 .AddMongoRepository()
                 .AddMongoDbForAspIdentity<External.IdentityUser, External.IdentityRole>(Configuration)
                 .AddClients()
                 .AddIdentityApiResources()
                 .AddPersistedGrants()
-                .AddProfileService<ProfileService>();
+                .AddProfileService<ProfileService>()
+                .AddAspNetIdentity<External.IdentityUser>();
+
+            services.AddMvc();
+            services.Configure<MvcOptions>(options =>
+            {
+                options.Filters.Add(new CorsAuthorizationFilterFactory("CorsPolicy"));
+            });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -40,10 +56,10 @@ namespace AuthorizationServerV2
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseIdentityServer();
             app.UseMongoDbForIdentityServer();
-            app.UseAuthentication();
+            app.UseCors("CorsPolicy");
 
             app.UseMvc();
 

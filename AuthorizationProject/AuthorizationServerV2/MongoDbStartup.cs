@@ -79,7 +79,8 @@ namespace AuthorizationServerV2
                 }
                 createdNewRepository = true;
             }
-            
+
+
             if (createdNewRepository == true)
             {
                 AddSampleUsersToMongo(userManager);

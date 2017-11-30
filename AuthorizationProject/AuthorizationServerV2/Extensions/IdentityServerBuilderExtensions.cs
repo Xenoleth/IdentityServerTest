@@ -15,7 +15,7 @@ namespace AuthorizationServerV2.Extensions
     {
         public static IIdentityServerBuilder AddMongoRepository(this IIdentityServerBuilder builder)
         {
-            builder.Services.AddTransient<IRepository, MongoRepository>();
+            builder.Services.AddTransient<IRepository, MongoDbContext>();
             return builder;
         }
 
@@ -43,15 +43,19 @@ namespace AuthorizationServerV2.Extensions
             });
 
             // Changed to return RoleStore instead of interface IRoleStore to work
-            builder.Services.AddSingleton<RoleStore<TRole>>(x =>
+            builder.Services.AddSingleton<IRoleStore<TRole>>(x =>
             {
                 var rolesCollection = database.GetCollection<TRole>("Identity_Roles");
                 IndexChecks.EnsureUniqueIndexOnNormalizedRoleName(rolesCollection);
                 return new RoleStore<TRole>(rolesCollection);
             });
+
             // TODO: Add password settings, etc.
             // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity-configuration?tabs=aspnetcore2x
             builder.Services.AddIdentity<TIdentity, TRole>();
+                //.AddUserStore<UserStore<TIdentity>>()
+                //.AddRoleStore<RoleStore<TRole>>()
+                //.AddDefaultTokenProviders();
 
             return builder;
         }

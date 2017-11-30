@@ -12,7 +12,9 @@
     <PackageReference Include="AspNetCore.Identity.MongoDbCore" Version="1.0.6" />
     <PackageReference Include="FB.AspNetCore.Identity.MongoDB" Version="2.0.0" />
     <PackageReference Include="IdentityServer4" Version="2.0.4" />
+    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.MongoDB" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="MongoDB.Bson" Version="2.4.4" />

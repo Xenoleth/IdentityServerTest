@@ -1,0 +1,14 @@
+{
+  "name": "client-js",
+  "version": "1.0.0",
+  "description": "JavaScript client to a .NET Core Web API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "oidc-client": "^1.4.1"
+  }
+}
