@@ -80,6 +80,7 @@ namespace AuthorizationServerV2.Configuration
                     },
                     AllowOfflineAccess = true
                 },
+
                 new Client
                 {
                     ClientId = "js",
@@ -95,7 +96,7 @@ namespace AuthorizationServerV2.Configuration
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
-                        "api1"
+                        "api.sample"
                     }
                 }
             };

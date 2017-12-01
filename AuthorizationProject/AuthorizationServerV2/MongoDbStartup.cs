@@ -1,12 +1,9 @@
-﻿using AspNetCore.Identity.MongoDbCore.Models;
-using AuthorizationServerV2.Configuration;
-using AuthorizationServerV2.External;
+﻿using AuthorizationServerV2.Configuration;
 using AuthorizationServerV2.Repository;
 using IdentityModel;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.MongoDB;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +11,6 @@ using MongoDB.Bson.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 
 namespace AuthorizationServerV2
 {
@@ -26,31 +22,41 @@ namespace AuthorizationServerV2
         {
             var repository = app.ApplicationServices.GetService<IRepository>();
 
-            // TODO: Create factory to generate a UserManager<External.IdentityUser>
-            var usrStr = app.ApplicationServices.GetService<IUserStore<External.IdentityUser>>();
-            var opt = app.ApplicationServices.GetService<IOptions<IdentityOptions>>();
+            // TODO: Use Scope to create the UserManager
+            //var scopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+            //using (var scope = scopeFactory.CreateScope())
+            //{
+            //    var usrMgr2 = app.ApplicationServices.GetService<UserManager<External.IdentityUser>>();
+            //    var asd = 5;
+            //}
+
+            //// TODO: Create factory to generate a UserManager<External.IdentityUser>
+            //var usrStr = app.ApplicationServices.GetService<IUserStore<External.IdentityUser>>();
+            //var opt = app.ApplicationServices.GetService<IOptions<IdentityOptions>>();
             //var pssHshr = app.ApplicationServices.GetService<IPasswordHasher<External.IdentityUser>>();
-            var pssHshr = new PasswordHasher<External.IdentityUser>();
-            var usrValColl = new List<IUserValidator<External.IdentityUser>>();
-            var userVal = new UserValidator<External.IdentityUser>();
-            usrValColl.Add(userVal);
-            //usrVal.Add(app.ApplicationServices.GetService<IUserValidator<External.IdentityUser>>());
-            var pssValColl = new List<IPasswordValidator<External.IdentityUser>>();
-            var pssVal = new PasswordValidator<External.IdentityUser>();
-            pssValColl.Add(pssVal);
-            //pssVal.Add(app.ApplicationServices.GetService<IPasswordValidator<External.IdentityUser>>());
+            ////var pssHshr = new PasswordHasher<External.IdentityUser>();
+            //var usrValColl = new List<IUserValidator<External.IdentityUser>>();
+            ////var userVal = new UserValidator<External.IdentityUser>();
+            ////usrValColl.Add(userVal);
+            //usrValColl.Add(app.ApplicationServices.GetService<IUserValidator<External.IdentityUser>>());
+            //var pssValColl = new List<IPasswordValidator<External.IdentityUser>>();
+            ////var pssVal = new PasswordValidator<External.IdentityUser>();
+            //var pssVal = app.ApplicationServices.GetService<IPasswordValidator<External.IdentityUser>>();
+            //pssValColl.Add(pssVal);
+            ////var asd = app.ApplicationServices.GetService<IUserValidator<External.IdentityUser>>();
+            ////pssVal.Add(app.ApplicationServices.GetService<IPasswordValidator<External.IdentityUser>>());
             //var keyNor = app.ApplicationServices.GetService<ILookupNormalizer>();
-            var keyNor = new Object() as ILookupNormalizer;
+            ////var keyNor = new Object() as ILookupNormalizer;
             //var err = app.ApplicationServices.GetService<IdentityErrorDescriber>();
-            var err = new IdentityErrorDescriber();
-            var srvPrv = app.ApplicationServices.GetService<IServiceProvider>();
-            var lgr = app.ApplicationServices.GetService<ILogger<UserManager<External.IdentityUser>>>();
-            var userManager = new UserManager<External.IdentityUser>(usrStr, opt, pssHshr, usrValColl, pssValColl, keyNor, err, srvPrv, lgr);
+            ////var err = new IdentityErrorDescriber();
+            //var srvPrv = app.ApplicationServices.GetService<IServiceProvider>();
+            //var lgr = app.ApplicationServices.GetService<ILogger<UserManager<External.IdentityUser>>>();
+            //var userManager = new UserManager<External.IdentityUser>(usrStr, opt, pssHshr, usrValColl, pssValColl, keyNor, err, srvPrv, lgr);
+            var userManager = app.ApplicationServices.GetService<UserManager<External.IdentityUser>>();
 
             ConfigureMongoDriver2IgnoreExtraElements();
 
             var createdNewRepository = false;
-
 
             if (!repository.CollectionExists<Client>())
             {
