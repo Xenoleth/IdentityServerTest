@@ -52,10 +52,11 @@ namespace AuthorizationServerV2.Extensions
 
             // TODO: Add password settings, etc.
             // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity-configuration?tabs=aspnetcore2x
-            builder.Services.AddIdentity<TIdentity, TRole>();
-                //.AddUserStore<UserStore<TIdentity>>()
-                //.AddRoleStore<RoleStore<TRole>>()
-                //.AddDefaultTokenProviders();
+            builder.Services.AddIdentity<TIdentity, TRole>()
+                .AddUserStore<UserStore<TIdentity>>()
+                .AddRoleStore<RoleStore<TRole>>()
+                .AddDefaultTokenProviders();
+                //.AddOpenIddict();
 
             return builder;
         }
