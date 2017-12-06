@@ -2,18 +2,15 @@
 using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
 using AuthorizationServerV5.External;
+using AuthorizationServerV5.Mongo;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OpenIddict.Core;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AuthorizationServerV5.Controllers
@@ -37,12 +34,12 @@ namespace AuthorizationServerV5.Controllers
     public class AuthorizationController : Controller
     {
         private readonly IOptions<IdentityOptions> identityOptions;
-        private readonly SignInManager<IdentityUser2> signInManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<IdentityRole2> userManager;
 
         public AuthorizationController(
             IOptions<IdentityOptions> identityOptions,
-            SignInManager<IdentityUser2> signInManager
+            SignInManager<ApplicationUser> signInManager
             )
         {
             
