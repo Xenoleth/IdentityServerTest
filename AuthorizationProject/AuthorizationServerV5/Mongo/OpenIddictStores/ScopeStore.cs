@@ -29,9 +29,11 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
             throw new NotImplementedException();
         }
 
-        public Task<TScope> CreateAsync(TScope scope, CancellationToken cancellationToken)
+        public async Task<TScope> CreateAsync(TScope scope, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await this.dbContext.CreateScope(scope);
+
+            return new Scope() as TScope;
         }
 
         public Task<TScope> CreateAsync(OpenIddictScopeDescriptor descriptor, CancellationToken cancellationToken)

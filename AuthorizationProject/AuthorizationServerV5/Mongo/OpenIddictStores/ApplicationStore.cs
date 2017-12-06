@@ -29,29 +29,47 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
             throw new NotImplementedException();
         }
 
-        public Task<TApplication> CreateAsync(TApplication application, CancellationToken cancellationToken)
+        public async Task<TApplication> CreateAsync(TApplication application, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await this.dbContext.CreateApplication(application);
+
+            return application;
         }
 
-        public Task<TApplication> CreateAsync(OpenIddictApplicationDescriptor descriptor, CancellationToken cancellationToken)
+        public async Task<TApplication> CreateAsync(OpenIddictApplicationDescriptor descriptor, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var app = new Application()
+            {
+                ClientId = descriptor.ClientId,
+                ClientSecret = descriptor.ClientSecret,
+                DisplayName = descriptor.DisplayName,
+                PostLogoutRedirectUris = descriptor.PostLogoutRedirectUris.ToString(),
+                RedirectUris = descriptor.RedirectUris.ToString(),
+                Type = descriptor.Type
+            };
+
+            await this.dbContext.CreateApplication(app);
+
+            return app as TApplication;
         }
 
-        public Task DeleteAsync(TApplication application, CancellationToken cancellationToken)
+        public async Task DeleteAsync(TApplication application, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await this.dbContext.DeleteApplication(application.Id);
         }
 
-        public Task<TApplication> FindByClientIdAsync(string identifier, CancellationToken cancellationToken)
+        public async Task<TApplication> FindByClientIdAsync(string identifier, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var app = await this.dbContext.FindApplicationByClientId(identifier);
+
+            return app as TApplication;
         }
 
-        public Task<TApplication> FindByIdAsync(string identifier, CancellationToken cancellationToken)
+        public async Task<TApplication> FindByIdAsync(string identifier, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var app = await this.dbContext.FindApplicationById(identifier);
+
+            return app as TApplication;
         }
 
         public Task<ImmutableArray<TApplication>> FindByPostLogoutRedirectUriAsync(string address, CancellationToken cancellationToken)

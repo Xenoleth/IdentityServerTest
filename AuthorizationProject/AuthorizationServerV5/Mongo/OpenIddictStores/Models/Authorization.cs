@@ -6,10 +6,12 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores.Models
     public class Authorization
     {
         private string concurrencyToken;
+        private IList<Token> tokens;
 
         public Authorization()
         {
             this.concurrencyToken = Guid.NewGuid().ToString();
+            this.tokens = new List<Token>();
         }
 
         public virtual string Id { get; set; }
@@ -37,6 +39,6 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores.Models
 
         public virtual Application Application { get; set; }
 
-        public virtual IList<Token> Tokens { get; } = new List<Token>();
+        public virtual IList<Token> Tokens { get; } 
     }
 }

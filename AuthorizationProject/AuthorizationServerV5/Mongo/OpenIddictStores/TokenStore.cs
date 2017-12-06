@@ -29,14 +29,30 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
             throw new NotImplementedException();
         }
 
-        public Task<TToken> CreateAsync(TToken token, CancellationToken cancellationToken)
+        public async Task<TToken> CreateAsync(TToken token, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await this.dbContext.CreateToken(token);
+
+            return new Token() as TToken;
         }
 
-        public Task<TToken> CreateAsync(OpenIddictTokenDescriptor descriptor, CancellationToken cancellationToken)
+        public async Task<TToken> CreateAsync(OpenIddictTokenDescriptor descriptor, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var token = new Token()
+            {
+                 Ciphertext = descriptor.Ciphertext,
+
+                 CreationDate = descriptor.CreationDate,
+                 ExpirationDate = descriptor.ExpirationDate,
+                 Hash = descriptor.Hash,
+                 Status = descriptor.Status,
+                 Subject = descriptor.Subject,
+                 Type = descriptor.Type
+            };
+
+            await this.dbContext.CreateToken(token);
+
+            return token as TToken;
         }
 
         public Task DeleteAsync(TToken token, CancellationToken cancellationToken)
@@ -101,7 +117,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
 
         public Task<string> GetIdAsync(TToken token, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => token.Id);
         }
 
         public Task<string> GetStatusAsync(TToken token, CancellationToken cancellationToken)

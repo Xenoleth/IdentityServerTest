@@ -1,4 +1,5 @@
 using AspNet.Security.OAuth.Validation;
+using AspNet.Security.OpenIdConnect.Primitives;
 using AuthorizationServerV5.Mongo;
 using AuthorizationServerV5.Mongo.Contracts;
 using AuthorizationServerV5.Mongo.OpenIddictStores;
@@ -75,6 +76,13 @@ namespace AuthorizationServerV5
                 .AddRoleStore<RoleStore<ApplicationRole>>()
                 .AddDefaultTokenProviders();
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
+                options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
+                options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
+            });
+
             services.AddOpenIddict<Application, Authorization, Scope, Token>(options =>
             {
                 options.AddMvcBinders();
@@ -84,6 +92,8 @@ namespace AuthorizationServerV5
                 options.AddScopeStore<ScopeStore<Scope>>();
                 options.AddTokenStore<TokenStore<Token>>();
 
+                //options.EnableAuthorizationEndpoint("/connect/authorize");
+                //options.EnableLogoutEndpoint("/connect/logout");
                 options.EnableTokenEndpoint("/connect/token");
                 options.AllowPasswordFlow()
                     .AllowRefreshTokenFlow();

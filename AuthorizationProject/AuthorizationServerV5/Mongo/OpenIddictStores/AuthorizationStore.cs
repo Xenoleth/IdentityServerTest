@@ -29,14 +29,28 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
             throw new NotImplementedException();
         }
 
-        Task<TAuthorization> IOpenIddictAuthorizationStore<TAuthorization>.CreateAsync(TAuthorization authorization, CancellationToken cancellationToken)
+        async Task<TAuthorization> IOpenIddictAuthorizationStore<TAuthorization>.CreateAsync(TAuthorization authorization, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await this.dbContext.CreateAuthorization(authorization);
+
+            var auth = new Authorization();
+
+            return auth as TAuthorization;
         }
 
-        Task<TAuthorization> IOpenIddictAuthorizationStore<TAuthorization>.CreateAsync(OpenIddictAuthorizationDescriptor descriptor, CancellationToken cancellationToken)
+        async Task<TAuthorization> IOpenIddictAuthorizationStore<TAuthorization>.CreateAsync(OpenIddictAuthorizationDescriptor descriptor, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var auth = new Authorization()
+            {
+                Id = descriptor.ApplicationId,
+                Status = descriptor.Status,
+                Subject = descriptor.Subject,
+                Type = descriptor.Type
+            };
+
+            await this.dbContext.CreateAuthorization(auth);
+
+            return auth as TAuthorization;
         }
 
         Task IOpenIddictAuthorizationStore<TAuthorization>.DeleteAsync(TAuthorization authorization, CancellationToken cancellationToken)
@@ -66,7 +80,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
 
         Task<string> IOpenIddictAuthorizationStore<TAuthorization>.GetIdAsync(TAuthorization authorization, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => authorization.Id);
         }
 
         Task<string> IOpenIddictAuthorizationStore<TAuthorization>.GetStatusAsync(TAuthorization authorization, CancellationToken cancellationToken)

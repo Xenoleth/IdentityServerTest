@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using AuthorizationServerV5.Mongo.OpenIddictStores.Models;
+using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,5 +18,16 @@ namespace AuthorizationServerV5.Mongo.Contracts
         Task<List<BsonDocument>> GetRole(string name);
         Task UpdateRole(string name, string newName);
         Task DeleteRole(string role);
+
+        Task CreateApplication(Application application);
+        Task DeleteApplication(string id);
+        Task<Application> FindApplicationByClientId(string id);
+        Task<Application> FindApplicationById(string id);
+
+        Task CreateAuthorization(Authorization auth);
+
+        Task CreateScope(Scope scope);
+
+        Task CreateToken(Token token);
     }
 }

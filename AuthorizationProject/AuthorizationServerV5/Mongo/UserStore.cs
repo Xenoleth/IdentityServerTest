@@ -34,7 +34,8 @@ namespace AuthorizationServerV5.Mongo
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            // TODO: Implement Dispose
+            GC.SuppressFinalize(this);
         }
 
         public async Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
