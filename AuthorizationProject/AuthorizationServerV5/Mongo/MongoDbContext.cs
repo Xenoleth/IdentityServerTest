@@ -129,7 +129,7 @@ namespace AuthorizationServerV5.Mongo
         {
             var document = new BsonDocument()
             {
-                { "id", application.Id ?? "default" },
+                { "identifier", application.Identifier ?? "default" },
                 { "clientId", application.ClientId ?? "default" },
                 { "clientSecret", application.ClientSecret ?? "default" },
                 { "concurrencyToken", application.ConcurrencyToken ?? "default" },
@@ -144,7 +144,7 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task DeleteApplication(string id)
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("id", id);
+            var filter = Builders<BsonDocument>.Filter.Eq("identifier", id);
             var result = await this.applications.DeleteOneAsync(filter);
         }
 
@@ -154,7 +154,7 @@ namespace AuthorizationServerV5.Mongo
             var bsonApp = await this.applications.Find(filter).ToListAsync();
             var app = new Application()
             {
-                Id = bsonApp[0]["id"].ToString(),
+                Identifier = bsonApp[0]["identifier"].ToString(),
                 ClientId = bsonApp[0]["clientId"].ToString(),
                 ClientSecret = bsonApp[0]["clientSecret"].ToString()
                 // TODO: Map the rest of the application model
@@ -165,11 +165,11 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task<Application> FindApplicationById(string id)
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("id", id);
+            var filter = Builders<BsonDocument>.Filter.Eq("identifier", id);
             var bsonApp = await this.applications.Find(filter).ToListAsync();
             var app = new Application()
             {
-                Id = bsonApp[0]["id"].ToString(),
+                Identifier = bsonApp[0]["identifier"].ToString(),
                 ClientId = bsonApp[0]["clientId"].ToString(),
                 ClientSecret = bsonApp[0]["clientSecret"].ToString()
                 // TODO: Map the rest of the application model
@@ -183,7 +183,7 @@ namespace AuthorizationServerV5.Mongo
         {
             var document = new BsonDocument()
             {
-                { "id", auth.Id ?? "default" },
+                { "identifier", auth.Identifier ?? "default" },
                 { "concurrencyToken", auth.ConcurrencyToken ?? "default" },
                 { "scopes", auth.Scopes ?? "default" },
                 { "status", auth.Status ?? "default" },
@@ -199,7 +199,7 @@ namespace AuthorizationServerV5.Mongo
         {
             var document = new BsonDocument()
             {
-                { "id", scope.Id ?? "default" },
+                { "identifier", scope.Identifier ?? "default" },
                 { "concurrencyToken", scope.ConcurrencyToken ?? "default" },
                 { "description", scope.Description ?? "default" },
                 { "name", scope.Name ?? "default" }
@@ -213,7 +213,7 @@ namespace AuthorizationServerV5.Mongo
         {
             var document = new BsonDocument()
             {
-                { "id", token.Id ?? "default" },
+                { "identifier", token.Identifier ?? "default" },
                 { "ciphertext", token.Ciphertext ?? "default" },
                 { "concurrencyToken", token.ConcurrencyToken ?? "default" },
                 { "hash", token.Hash ?? "default" },
@@ -225,6 +225,33 @@ namespace AuthorizationServerV5.Mongo
             };
                     
             await this.tokens.InsertOneAsync(document);
+        }
+
+        public async Task<BsonDocument> FindTokenById(string id)
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("identifier", id);
+            var result = await this.tokens.Find(filter).ToListAsync();
+
+            return result[0];
+        }
+
+        public async Task UpdateToken(Token token)
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("identifier", token.Identifier);
+            var document = new BsonDocument()
+            {
+                { "identifier", token.Identifier ?? "default" },
+                { "ciphertext", token.Ciphertext ?? "default" },
+                { "concurrencyToken", token.ConcurrencyToken ?? "default" },
+                { "hash", token.Hash ?? "default" },
+                { "status", token.Status ?? "default" },
+                { "subject", token.Subject ?? "default" },
+                { "type", token.Type ?? "default" },
+                { "creationDate", token.CreationDate.ToString() ?? "default" },
+                { "expirationDate", token.ExpirationDate.ToString() ?? "default" }
+            };
+
+            await this.tokens.ReplaceOneAsync(filter, document);
         }
     }
 }

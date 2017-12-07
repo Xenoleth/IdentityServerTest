@@ -40,14 +40,18 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
         {
             var token = new Token()
             {
-                 Ciphertext = descriptor.Ciphertext,
+                Ciphertext = descriptor.Ciphertext,
 
-                 CreationDate = descriptor.CreationDate,
-                 ExpirationDate = descriptor.ExpirationDate,
-                 Hash = descriptor.Hash,
-                 Status = descriptor.Status,
-                 Subject = descriptor.Subject,
-                 Type = descriptor.Type
+                CreationDate = descriptor.CreationDate,
+                ExpirationDate = descriptor.ExpirationDate,
+                Hash = descriptor.Hash,
+                Status = descriptor.Status,
+                Subject = descriptor.Subject,
+                Type = descriptor.Type,
+                Identifier = Guid.NewGuid().ToString(),
+                Application = new Application(),
+                Authorization = new Authorization(),
+                ConcurrencyToken = Guid.NewGuid().ToString()
             };
 
             await this.dbContext.CreateToken(token);
@@ -70,9 +74,26 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
             throw new NotImplementedException();
         }
 
-        public Task<TToken> FindByIdAsync(string identifier, CancellationToken cancellationToken)
+        public async Task<TToken> FindByIdAsync(string identifier, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result = await this.dbContext.FindTokenById(identifier);
+
+            var token = new Token()
+            {
+                Application = new Application(),
+                Ciphertext = result["ciphertext"].ToString(),
+                Authorization = new Authorization(),
+                ConcurrencyToken = result["concurrencyToken"].ToString(),
+                CreationDate = DateTime.Now,
+                ExpirationDate = DateTime.Now.AddHours(10),
+                Hash = result["hash"].ToString(),
+                Identifier = result["identifier"].ToString(),
+                Status = result["status"].ToString(),
+                Subject = result["subject"].ToString(),
+                Type = result["type"].ToString()
+            } as TToken;
+
+            return token;
         }
 
         public Task<ImmutableArray<TToken>> FindBySubjectAsync(string subject, CancellationToken cancellationToken)
@@ -117,12 +138,12 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
 
         public Task<string> GetIdAsync(TToken token, CancellationToken cancellationToken)
         {
-            return Task.Run(() => token.Id);
+            return Task.Run(() => token.Identifier);
         }
 
         public Task<string> GetStatusAsync(TToken token, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => "valid");
         }
 
         public Task<string> GetSubjectAsync(TToken token, CancellationToken cancellationToken)
@@ -160,9 +181,9 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
             throw new NotImplementedException();
         }
 
-        public Task SetExpirationDateAsync(TToken token, DateTimeOffset? date, CancellationToken cancellationToken)
+        public async Task SetExpirationDateAsync(TToken token, DateTimeOffset? date, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            token.ExpirationDate = date;
         }
 
         public Task SetStatusAsync(TToken token, string status, CancellationToken cancellationToken)
@@ -170,9 +191,9 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(TToken token, CancellationToken cancellationToken)
+        public async Task UpdateAsync(TToken token, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await this.dbContext.UpdateToken(token);
         }
     }
 }

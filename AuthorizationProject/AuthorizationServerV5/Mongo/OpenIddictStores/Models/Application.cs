@@ -16,7 +16,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores.Models
             this.tokens = new List<Token>();
         }
 
-        public virtual string Id { get; set; }
+        public virtual string Identifier { get; set; }
 
         public virtual string ClientId { get; set; }
 

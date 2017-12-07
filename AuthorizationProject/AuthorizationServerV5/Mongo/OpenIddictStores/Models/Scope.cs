@@ -11,7 +11,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores.Models
             this.concurrencyToken = Guid.NewGuid().ToString();
         }
 
-        public virtual string Id { get; set; }
+        public virtual string Identifier { get; set; }
 
         public virtual string Name { get; set; }
 

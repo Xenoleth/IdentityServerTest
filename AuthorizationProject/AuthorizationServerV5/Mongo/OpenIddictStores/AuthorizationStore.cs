@@ -42,7 +42,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
         {
             var auth = new Authorization()
             {
-                Id = descriptor.ApplicationId,
+                Identifier = descriptor.ApplicationId,
                 Status = descriptor.Status,
                 Subject = descriptor.Subject,
                 Type = descriptor.Type
@@ -80,7 +80,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
 
         Task<string> IOpenIddictAuthorizationStore<TAuthorization>.GetIdAsync(TAuthorization authorization, CancellationToken cancellationToken)
         {
-            return Task.Run(() => authorization.Id);
+            return Task.Run(() => authorization.Identifier);
         }
 
         Task<string> IOpenIddictAuthorizationStore<TAuthorization>.GetStatusAsync(TAuthorization authorization, CancellationToken cancellationToken)

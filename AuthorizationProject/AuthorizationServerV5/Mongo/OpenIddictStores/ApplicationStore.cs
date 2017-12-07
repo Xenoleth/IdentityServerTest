@@ -55,7 +55,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
 
         public async Task DeleteAsync(TApplication application, CancellationToken cancellationToken)
         {
-            await this.dbContext.DeleteApplication(application.Id);
+            await this.dbContext.DeleteApplication(application.Identifier);
         }
 
         public async Task<TApplication> FindByClientIdAsync(string identifier, CancellationToken cancellationToken)

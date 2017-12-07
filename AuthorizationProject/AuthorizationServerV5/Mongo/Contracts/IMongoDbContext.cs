@@ -29,5 +29,7 @@ namespace AuthorizationServerV5.Mongo.Contracts
         Task CreateScope(Scope scope);
 
         Task CreateToken(Token token);
+        Task<BsonDocument> FindTokenById(string id);
+        Task UpdateToken(Token token);
     }
 }

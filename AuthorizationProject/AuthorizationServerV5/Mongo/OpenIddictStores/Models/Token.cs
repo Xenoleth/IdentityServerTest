@@ -36,7 +36,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores.Models
 
         public virtual string Hash { get; set; }
 
-        public virtual string Id { get; set; }
+        public virtual string Identifier { get; set; }
 
         public virtual string Status { get; set; }
 
