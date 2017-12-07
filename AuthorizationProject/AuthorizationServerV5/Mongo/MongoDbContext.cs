@@ -55,7 +55,7 @@ namespace AuthorizationServerV5.Mongo
         {
             var filter = new BsonDocument()
             {
-                { "username", username }
+                { "username", username },
             };
             var result = await this.users.Find(filter).ToListAsync();
 

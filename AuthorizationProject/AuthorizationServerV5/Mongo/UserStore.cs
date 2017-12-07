@@ -18,7 +18,7 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
         {
-            await this.dbContext.CreateUser(user.UserName, user.Password);
+            await this.dbContext.CreateUser(user.Username, user.Password);
 
             var result = new IdentityResult();
 
@@ -27,7 +27,7 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
         {
-            await this.dbContext.DeleteUser(user.UserName);
+            await this.dbContext.DeleteUser(user.Username);
 
             return IdentityResult.Success;
         }
@@ -43,7 +43,7 @@ namespace AuthorizationServerV5.Mongo
             var bsonUser = await this.dbContext.GetUserById(userId);
             var user = new ApplicationUser()
             {
-                UserName = bsonUser[0]["username"].ToString(),
+                Username = bsonUser[0]["username"].ToString(),
                 Password = bsonUser[0]["password"].ToString()
             };
 
@@ -55,7 +55,7 @@ namespace AuthorizationServerV5.Mongo
             var bsonUser = await this.dbContext.GetUser(normalizedUserName);
             var user = new ApplicationUser()
             {
-                UserName = bsonUser[0]["username"].ToString(),
+                Username = bsonUser[0]["username"].ToString(),
                 Password = bsonUser[0]["password"].ToString()
             };
 
@@ -64,12 +64,12 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken)
         {
-            return user.UserName.Normalize();
+            return user.Username.Normalize();
         }
 
         public async Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
         {
-            var bsonUser = await this.dbContext.GetUser(user.UserName);
+            var bsonUser = await this.dbContext.GetUser(user.Username);
             var username = bsonUser[0]["username"].ToString();
 
             return username;
@@ -77,22 +77,22 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken)
         {
-            return user.UserName;
+            return user.Username;
         }
 
         public async Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken)
         {
-            await this.dbContext.UpdateUser(user.UserName, normalizedName);
+            await this.dbContext.UpdateUser(user.Username, normalizedName);
         }
 
         public async Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
         {
-            await this.dbContext.UpdateUser(user.UserName, userName);
+            await this.dbContext.UpdateUser(user.Username, userName);
         }
 
         public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
-            await this.dbContext.UpdateUser(user.UserName, user.UserName);
+            await this.dbContext.UpdateUser(user.Username, user.Username);
 
             return IdentityResult.Success;
         }
