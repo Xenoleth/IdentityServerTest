@@ -15,13 +15,13 @@ namespace AuthorizationServerV5.Controllers
         }
 
         [HttpPost("~/asd/register")]
-        public async Task<IActionResult> Register([FromBody] ApplicationUser user)
+        public async Task<IActionResult> Register([FromBody]PropyUser user)
         {
-            await this.dbContext.CreateUser(user.Username, user.Password);
+            await this.dbContext.CreateUser(user);
 
             return new JsonResult(new
             {
-                response = $"User with name {user.Username} was created"
+                response = $"User with name {user.FirstName} was created"
             });
         }
     }

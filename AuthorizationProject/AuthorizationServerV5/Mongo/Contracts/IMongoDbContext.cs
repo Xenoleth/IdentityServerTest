@@ -7,7 +7,7 @@ namespace AuthorizationServerV5.Mongo.Contracts
 {
     public interface IMongoDbContext
     {
-        Task CreateUser(string username, string password);
+        Task CreateUser(PropyUser user);
         Task<List<BsonDocument>> GetUser(string username);
         Task<List<BsonDocument>> GetUserById(string id);
         Task UpdateUser(string username, string newName);

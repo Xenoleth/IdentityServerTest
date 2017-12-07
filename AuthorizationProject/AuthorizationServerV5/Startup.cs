@@ -29,7 +29,7 @@ namespace AuthorizationServerV5
             services.AddMvc();
 
             services.AddScoped<IMongoDbContext, MongoDbContext>();
-            services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser>>();
+            services.AddScoped<IUserStore<PropyUser>, UserStore<PropyUser>>();
             services.AddScoped<IRoleStore<ApplicationRole>, RoleStore<ApplicationRole>>();
             
             services.AddScoped<OpenIddictApplication<string>>(x =>
@@ -71,8 +71,8 @@ namespace AuthorizationServerV5
             //    .AddEntityFrameworkStores<ApplicationDbContext>()
             //    .AddDefaultTokenProviders();
 
-            services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddUserStore<UserStore<ApplicationUser>>()
+            services.AddIdentity<PropyUser, ApplicationRole>()
+                .AddUserStore<UserStore<PropyUser>>()
                 .AddRoleStore<RoleStore<ApplicationRole>>()
                 .AddDefaultTokenProviders();
 

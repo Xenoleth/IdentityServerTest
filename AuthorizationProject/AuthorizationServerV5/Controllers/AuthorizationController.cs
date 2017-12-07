@@ -36,16 +36,18 @@ namespace AuthorizationServerV5.Controllers
     {
         //private readonly IOptions<IdentityOptions> identityOptions;
         //private readonly SignInManager<ApplicationUser> signInManager;
-        //private readonly UserManager<ApplicationUser> userManager;
+        private readonly UserManager<PropyUser> userManager;
         private readonly IMongoDbContext dbContext;
 
         public AuthorizationController(
             //IOptions<IdentityOptions> identityOptions,
             //SignInManager<ApplicationUser> signInManager,
+            UserManager<PropyUser> userManager,
             IMongoDbContext dbContext
             )
         {
             this.dbContext = dbContext;
+            this.userManager = userManager;
         }
 
         [HttpPost("~/connect/token"), Produces("application/json")]
@@ -60,18 +62,23 @@ namespace AuthorizationServerV5.Controllers
                 // the password validation process. You SHOULD also consider
                 // using a time-constant comparer to prevent timing attacks.
                 var bsonUser = await this.dbContext.GetUser(request.Username);
-                var user = new ApplicationUser()
+
+                var user = new PropyUser()
                 {
-                    Identifier = bsonUser[0]["_id"].ToString(),
-                    Username = bsonUser[0]["username"].ToString(),
-                    Password = bsonUser[0]["password"].ToString()
+                    Id = bsonUser[0]["_id"].ToString(),
+                    UserName = bsonUser[0]["UserName"].ToString(),
+                    PasswordHash = bsonUser[0]["PasswordHash"].ToString(),
+                    SecurityStamp = bsonUser[0]["SecurityStamp"].ToString()
                 };
 
-                if (user.Username != "alice@wonderland.com" ||
-                    user.Password != "P@ssw0rd")
-                {
-                    return Forbid(OpenIdConnectServerDefaults.AuthenticationScheme);
-                }
+                var hasher = new PasswordHasher<PropyUser>();
+                var asd = hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+                var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
+                //if (user.Username != "alice@wonderland.com" ||
+                //    user.Password != "P@ssw0rd")
+                //{
+                //    return Forbid(OpenIdConnectServerDefaults.AuthenticationScheme);
+                //}
                 // Create a new ClaimsIdentity holding the user identity.
                 var identity = new ClaimsIdentity(
                     OpenIdConnectServerDefaults.AuthenticationScheme,
@@ -87,9 +94,9 @@ namespace AuthorizationServerV5.Controllers
                 //    OpenIdConnectConstants.Destinations.AccessToken);
 
                 identity.AddClaim(OpenIdConnectConstants.Claims.Subject,
-                    user.Identifier,
+                    user.Id,
                     OpenIdConnectConstants.Destinations.AccessToken);
-                identity.AddClaim(OpenIdConnectConstants.Claims.Name, user.Username,
+                identity.AddClaim(OpenIdConnectConstants.Claims.Name, user.UserName,
                     OpenIdConnectConstants.Destinations.AccessToken);
                 // ... add other claims, if necessary.
                 var principal = new ClaimsPrincipal(identity);

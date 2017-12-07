@@ -32,13 +32,73 @@ namespace AuthorizationServerV5.Mongo
             this.tokens = this.database.GetCollection<BsonDocument>("Tokens");
         }
 
-        public async Task CreateUser(string username, string password)
+        public async Task CreateUser(PropyUser user)
         {
             var document = new BsonDocument
             {
-                { "username", username },
-                { "password", password }
+                { "UserName", user.UserName ?? "default" },
+                { "PasswordHash" , user.PasswordHash ?? "default" },
+                { "SecurityStamp" , user.SecurityStamp ?? "default" },
+                { "Roles" , new BsonArray {
+                    "Registered",
+                    "Escrow"
+                } },
+                { "Claims" , new BsonArray { "asd", "zxc" } },
+                { "Logins" , new BsonArray { "asd", "zxc" } },
+                { "userRatings" , new BsonArray { "asd", "zxc" } },
+                { "status" , user.Status ?? "default" },
+                {"firstName" , user.FirstName ?? "default" },
+                {"lastName" , user.LastName ?? "default" },
+                {"email" , user.Email ?? "default" },
+                {"avatar" , user.Avatar ?? "default" },
+                {"info" , user.Info ?? "default" },
+                { "favouriteProperties" , new BsonArray {"asd", "zxc" }},
+                { "hiddenProperties" , new BsonArray { "asd", "zxc"}},
+                { "listedProperties" , new BsonArray {"asd", "zxc" }},
+                {"compares" ,new BsonArray {"asd", "zxc" }},
+                {"connections" , new BsonArray {"asd", "zxc" }},
+                {"propyNotes" , new BsonArray { "asd", "zxc"}},
+                {"phoneNumber" , user.PhoneNumber  ?? "default"},
+                {"developments" , new BsonArray { "asd", "zxc"}},
+                {"checkIns" , new BsonArray {"asd", "zxc" }},
+                {"interests" , new BsonArray {"asd", "zxc" }},
+                {"expertises" , new BsonArray { "asd", "zxc"}},
+                {"locations" , new BsonArray {"asd", "zxc" }},
+                {"languages" , new BsonArray {"asd", "zxc" } },
+                {"agency" , user.Agency ?? "default"},
+                {"recommendations" , new BsonArray {"asd", "zxc" }},
+                {"rating" , user.Rating },
+                {"ratingsCount" , user.RatingsCount},
+                {"company" , user.Company ?? "default"},
+                {"occupation" , user.Occupation ?? "default"},
+                {"pROTokens" , user.PROTokens},
+                {"request" , new BsonDocument
+                    {
+                        { "type" , user.Request.Type ?? "default"},
+                        { "location" , user.Request.Location ?? "default"}
+                    }
+                },
+                {"propertyInterests" , new BsonArray {"asd", "zxc" }},
+                {"vipUntil" , user.VipUntil},
+                {"proUntil" , user.ProUntil},
+                {"lastLogIn" , user.LastLogIn},
+                {"lastNotification" , user.LastNotification},
+                {"locationOfWork" , user.LocationOfWork ?? "default"},
+                {"isPropyCreated" , user.IsPropyCreated},
+                {"pinRequests" , new BsonArray { "asd", "zxc"}},
+                {"crawlSite" , user.CrawlSite ?? "default"},
+                {"addedOn" , user.AddedOn},
+                {"lastUpdated" , user.LastUpdated},
+                {"pushIds" , new BsonArray {"asd", "zxc" }},
+                {"isEmailNotifications" , user.IsEmailNotifications},
+                {"userSettings" , user.UserSettings ?? "default"},
+                {"walletId" , user.WalletId  ?? "default"},
+                {"transactionHistory" , new BsonArray {"asd", "zxc" }},
+                {"stripeCustomerId" , user.StripeCustomerId ?? "default"}
             };
+
+            System.Console.WriteLine();
+
             await this.users.InsertOneAsync(document);
         }
 
@@ -55,7 +115,7 @@ namespace AuthorizationServerV5.Mongo
         {
             var filter = new BsonDocument()
             {
-                { "username", username },
+                { "UserName", username },
             };
             var result = await this.users.Find(filter).ToListAsync();
 
@@ -97,8 +157,8 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task UpdateUser(string username, string newName)
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("username", username);
-            var update = Builders<BsonDocument>.Update.Set("username", newName);
+            var filter = Builders<BsonDocument>.Filter.Eq("UserName", username);
+            var update = Builders<BsonDocument>.Update.Set("UserName", newName);
             var result = await this.users.UpdateOneAsync(filter, update);
         }
 
@@ -111,7 +171,7 @@ namespace AuthorizationServerV5.Mongo
 
         public async Task DeleteUser(string username)
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("username", username);
+            var filter = Builders<BsonDocument>.Filter.Eq("UserName", username);
             var result = await this.users.DeleteOneAsync(filter);
         }
 
