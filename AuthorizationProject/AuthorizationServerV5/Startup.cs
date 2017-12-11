@@ -4,6 +4,7 @@ using AuthorizationServerV5.Mongo;
 using AuthorizationServerV5.Mongo.Contracts;
 using AuthorizationServerV5.Mongo.OpenIddictStores;
 using AuthorizationServerV5.Mongo.OpenIddictStores.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -96,7 +97,8 @@ namespace AuthorizationServerV5
                 //options.EnableLogoutEndpoint("/connect/logout");
                 options.EnableTokenEndpoint("/connect/token");
                 options.AllowPasswordFlow()
-                    .AllowRefreshTokenFlow();
+                    .AllowRefreshTokenFlow()
+                    .AllowCustomFlow("urn:ietf:params:oauth:grant-type:facebook_access_token");
                 // Dev
                 options.DisableHttpsRequirement();
             });
@@ -107,6 +109,17 @@ namespace AuthorizationServerV5
             })
                 .AddOAuthValidation();
 
+            services.AddAuthentication()
+                .AddFacebook(options =>
+                {
+                    options.AppId = Configuration["Authentication:Facebook:AppId"];
+                    options.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
+                });
+
+            //services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy("FacebookAuthentication", policy => policy.Requirements.Add(new FacebookRequirement()));
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

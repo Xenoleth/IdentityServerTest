@@ -31,5 +31,8 @@ namespace AuthorizationServerV5.Mongo.Contracts
         Task CreateToken(Token token);
         Task<BsonDocument> FindTokenById(string id);
         Task UpdateToken(Token token);
+
+        // Facebook
+        Task<List<BsonDocument>> GetUserByFacebookId(string facebookId);
     }
 }

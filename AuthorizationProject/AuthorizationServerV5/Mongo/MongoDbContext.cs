@@ -94,10 +94,9 @@ namespace AuthorizationServerV5.Mongo
                 {"userSettings" , user.UserSettings ?? "default"},
                 {"walletId" , user.WalletId  ?? "default"},
                 {"transactionHistory" , new BsonArray {"asd", "zxc" }},
-                {"stripeCustomerId" , user.StripeCustomerId ?? "default"}
+                {"stripeCustomerId" , user.StripeCustomerId ?? "default"},
+                { "facebookId", user.FacebookId ?? "default" }
             };
-
-            System.Console.WriteLine();
 
             await this.users.InsertOneAsync(document);
         }
@@ -182,6 +181,17 @@ namespace AuthorizationServerV5.Mongo
                 { "name", role }
             };
             await this.roles.DeleteOneAsync(document);
+        }
+
+        public async Task<List<BsonDocument>> GetUserByFacebookId(string facebookId)
+        {
+            var filter = new BsonDocument()
+            {
+                { "facebookId", facebookId }
+            };
+            var result = await this.users.Find(filter).ToListAsync();
+
+            return result;
         }
 
         // Application store CRUD

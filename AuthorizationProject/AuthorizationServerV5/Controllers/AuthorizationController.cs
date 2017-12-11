@@ -2,6 +2,7 @@
 using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
 using AuthorizationServerV5.External;
+using AuthorizationServerV5.Facebook;
 using AuthorizationServerV5.Mongo;
 using AuthorizationServerV5.Mongo.Contracts;
 using Microsoft.AspNetCore.Authentication;
@@ -38,6 +39,7 @@ namespace AuthorizationServerV5.Controllers
         //private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<PropyUser> userManager;
         private readonly IMongoDbContext dbContext;
+        private readonly IFacebookService facebookService;
 
         public AuthorizationController(
             //IOptions<IdentityOptions> identityOptions,
@@ -48,6 +50,7 @@ namespace AuthorizationServerV5.Controllers
         {
             this.dbContext = dbContext;
             this.userManager = userManager;
+            this.facebookService = new FacebookService();
         }
 
         [HttpPost("~/connect/token"), Produces("application/json")]
@@ -71,9 +74,9 @@ namespace AuthorizationServerV5.Controllers
                     SecurityStamp = bsonUser[0]["SecurityStamp"].ToString()
                 };
 
+                // Check password hash
                 var hasher = new PasswordHasher<PropyUser>();
-                var asd = hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
-                var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
+                var verificationResult = hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
                 //if (user.Username != "alice@wonderland.com" ||
                 //    user.Password != "P@ssw0rd")
                 //{
@@ -138,6 +141,60 @@ namespace AuthorizationServerV5.Controllers
 
                 var ticket = new AuthenticationTicket(principal, info.Properties,
                 OpenIdConnectServerDefaults.AuthenticationScheme);
+
+                return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
+            }
+            else if (request.GrantType == "urn:ietf:params:oauth:grant-type:facebook_access_token")
+            {
+                var account = await this.facebookService.GetAccountAsync(request.Assertion);
+
+                var bsonUser = await this.dbContext.GetUserByFacebookId(account.Id);
+                PropyUser user;
+                if (bsonUser.Count == 0)
+                {
+                    user = new PropyUser()
+                    {
+                        Id = request.Assertion,
+                        FacebookId = account.Id,
+                        UserName = account.Username,
+                        FirstName = account.FirstName,
+                        LastName = account.LastName,
+                        Email = account.Email
+                    };
+
+                    await this.dbContext.CreateUser(user);
+                }
+                else
+                {
+                    user = new PropyUser()
+                    {
+                        Id = request.Assertion,
+                        FacebookId = bsonUser[0]["facebookId"].ToString(),
+                        UserName = bsonUser[0]["UserName"].ToString(),
+                        FirstName = bsonUser[0]["firstName"].ToString(),
+                        LastName = bsonUser[0]["lastName"].ToString(),
+                        Email = bsonUser[0]["facebookId"].ToString(),
+                    };
+                }
+
+                var identity = new ClaimsIdentity(
+                        OpenIdConnectServerDefaults.AuthenticationScheme,
+                        OpenIdConnectConstants.Claims.Name,
+                        OpenIdConnectConstants.Claims.Role);
+
+                identity.AddClaim(OpenIdConnectConstants.Claims.Subject,
+                    user.Id,
+                    OpenIdConnectConstants.Destinations.AccessToken);
+                identity.AddClaim(OpenIdConnectConstants.Claims.Name, user.UserName,
+                    OpenIdConnectConstants.Destinations.AccessToken);
+
+                var principal = new ClaimsPrincipal(identity);
+
+                var ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), OpenIdConnectServerDefaults.AuthenticationScheme);
+                ticket.SetScopes(new[]
+                    {
+                    OpenIdConnectConstants.Scopes.OfflineAccess,
+                });
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
