@@ -97,5 +97,6 @@ namespace AuthorizationServerV5.Mongo
         public List<string> TransactionHistory { get; set; }
         public string StripeCustomerId { get; set; }
         public string FacebookId { get; set; }
+        public string GoogleId { get; set; }
     }
 }

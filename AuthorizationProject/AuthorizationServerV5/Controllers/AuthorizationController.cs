@@ -9,9 +9,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using OpenIddict.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -200,38 +203,67 @@ namespace AuthorizationServerV5.Controllers
             }
             else if (request.GrantType == "urn:ietf:params:oauth:grant-type:google_identity_token")
             {
-                // TODO: Fix google authentication
-                var account = await this.facebookService.GetAccountAsync(request.Assertion);
+                // Exchange recieved Authorization Code for an access token
+                var tokenUrl = "https://www.googleapis.com/oauth2/v4/token";
 
-                var bsonUser = await this.dbContext.GetUserByFacebookId(account.Id);
-                PropyUser user;
+                //var code = "4/1VeXJLNmmH2dIYR8FSeW3OaVlYpK7BtZwVAhqzLvErk";
+                var code = request.Assertion;
+                var client_id = "295998800597-kao41iolosp6kl304dedl3u2551bogie.apps.googleusercontent.com";
+                var client_secret = "z4VDv49a9aGMtQQK4NM8dZnn";
+                var grant_type = "authorization_code";
+                var redirect_uri = "http://localhost:5000";
+
+                var data = new Dictionary<string, string>
+                {
+                    { "code", code },
+                    { "client_id", client_id },
+                    { "client_secret", client_secret },
+                    { "grant_type", grant_type },
+                    { "redirect_uri", redirect_uri }
+                };
+
+                var httpClient = new HttpClient();
+                var requestToken = new HttpRequestMessage(HttpMethod.Post, tokenUrl)
+                {
+                    Content = new FormUrlEncodedContent(data)
+                };
+                var response = await httpClient.SendAsync(requestToken);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var responseContentDeserializrd = JsonConvert.DeserializeObject<ResponseData>(responseContent);
+                var accessToken = responseContentDeserializrd.AccessToken;
+
+                // Use the access token to request the user's info
+                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+                var userInfoUrl = "https://www.googleapis.com/oauth2/v1/userinfo";
+                var userResponse = await httpClient.GetAsync(userInfoUrl);
+                var userResponseContent = await userResponse.Content.ReadAsStringAsync();
+                var userInfo = JsonConvert.DeserializeObject<UserInfo>(userResponseContent);
+
+                // Create user if one does not exist, and log him in
+                var user = new PropyUser();
+                var bsonUser = await this.dbContext.GetUserByGoogleId(userInfo.Id);
                 if (bsonUser.Count == 0)
                 {
-                    user = new PropyUser()
-                    {
-                        Id = request.Assertion,
-                        FacebookId = account.Id,
-                        UserName = account.Username,
-                        FirstName = account.FirstName,
-                        LastName = account.LastName,
-                        Email = account.Email
-                    };
+                    user.Id = Guid.NewGuid().ToString();
+                    user.Email = userInfo.Email;
+                    user.UserName = userInfo.Name;
+                    user.FirstName = userInfo.GivenName;
+                    user.LastName = userInfo.FamilyName;
+                    user.GoogleId = userInfo.Id;
 
                     await this.dbContext.CreateUser(user);
                 }
                 else
                 {
-                    user = new PropyUser()
-                    {
-                        Id = request.Assertion,
-                        FacebookId = bsonUser[0]["facebookId"].ToString(),
-                        UserName = bsonUser[0]["UserName"].ToString(),
-                        FirstName = bsonUser[0]["firstName"].ToString(),
-                        LastName = bsonUser[0]["lastName"].ToString(),
-                        Email = bsonUser[0]["facebookId"].ToString(),
-                    };
+                    user.Id = Guid.NewGuid().ToString();
+                    user.Email = bsonUser[0]["email"].ToString();
+                    user.UserName = bsonUser[0]["UserName"].ToString();
+                    user.FirstName = bsonUser[0]["firstName"].ToString();
+                    user.LastName = bsonUser[0]["lastName"].ToString();
+                    user.GoogleId = bsonUser[0]["googleId"].ToString();
                 }
 
+                // Create user's identity, a ticket and then sign him in
                 var identity = new ClaimsIdentity(
                         OpenIdConnectServerDefaults.AuthenticationScheme,
                         OpenIdConnectConstants.Claims.Name,

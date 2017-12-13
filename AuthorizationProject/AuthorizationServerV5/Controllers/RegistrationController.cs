@@ -6,9 +6,14 @@ using AuthorizationServerV5.Mongo;
 using AuthorizationServerV5.Mongo.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AuthorizationServerV5.Controllers
@@ -48,7 +53,6 @@ namespace AuthorizationServerV5.Controllers
             {
                 user = new PropyUser()
                 {
-
                     FacebookId = account.Id,
                     UserName = account.Username,
                     FirstName = account.FirstName,
@@ -92,10 +96,88 @@ namespace AuthorizationServerV5.Controllers
 
             return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
         }
+
+        [HttpPost("~/asd/google-login")]
+        [Produces("application/json")]
+        public async Task<IActionResult> GoogleLogin()
+        {
+            // Exchange recieved Authorization Code for an access token
+            var tokenUrl = "https://www.googleapis.com/oauth2/v4/token";
+
+            var code = "4/1VeXJLNmmH2dIYR8FSeW3OaVlYpK7BtZwVAhqzLvErk";
+            var client_id = "295998800597-kao41iolosp6kl304dedl3u2551bogie.apps.googleusercontent.com";
+            var client_secret = "z4VDv49a9aGMtQQK4NM8dZnn";
+            var grant_type = "authorization_code";
+            var redirect_uri = "http://localhost:5000";
+
+            var data = new Dictionary<string, string>
+            {
+                { "code", code },
+                { "client_id", client_id },
+                { "client_secret", client_secret },
+                { "grant_type", grant_type },
+                { "redirect_uri", redirect_uri }
+            };
+
+            var httpClient = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, tokenUrl)
+            {
+                Content = new FormUrlEncodedContent(data)
+            };
+            var response = await httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var responseContentDeserializrd = JsonConvert.DeserializeObject<ResponseData>(responseContent);
+            var accessToken = responseContentDeserializrd.AccessToken;
+
+            // Use the access token to request the user's info
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            var userInfoUrl = "https://www.googleapis.com/oauth2/v1/userinfo";
+            var userResponse = await httpClient.GetAsync(userInfoUrl);
+            var userResponseContent = await userResponse.Content.ReadAsStringAsync();
+            var userInfo = JsonConvert.DeserializeObject<UserInfo>(userResponseContent);
+
+            return new JsonResult(new { });
+        }
     }
 
     public class FacebookToken
     {
         public string AccessToken { get; set; }
+    }
+
+    public class ResponseData
+    {
+        // Success response date
+        [JsonProperty("access_token")]
+        public string AccessToken { get; set; }
+        [JsonProperty("token_type")]
+        public string TokenType { get; set; }
+        [JsonProperty("expires_in")]
+        public string ExpiresIn { get; set; }
+        [JsonProperty("refresh_token")]
+        public string RefreshToken { get; set; }
+        [JsonProperty("id_token")]
+        public string IdToken { get; set; }
+        // Error response data
+        [JsonProperty("error")]
+        public string Error { get; set; }
+        [JsonProperty("error_description")]
+        public string ErrorDescription { get; set; }
+    }
+
+    public class UserInfo
+    {
+        public string Id { get; set; }
+        public string Email { get; set; }
+        [JsonProperty("verified_email")]
+        public bool VerifiedEmail { get; set; }
+        public string Name { get; set; }
+        [JsonProperty("given_name")]
+        public string GivenName { get; set; }
+        [JsonProperty("family_name")]
+        public string FamilyName { get; set; }
+        public string Picture { get; set; }
+        public string Locale { get; set; }
+        public string Hd { get; set; }
     }
 }

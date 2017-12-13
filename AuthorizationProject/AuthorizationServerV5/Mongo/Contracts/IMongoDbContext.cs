@@ -34,5 +34,8 @@ namespace AuthorizationServerV5.Mongo.Contracts
 
         // Facebook
         Task<List<BsonDocument>> GetUserByFacebookId(string facebookId);
+
+        // Google
+        Task<List<BsonDocument>> GetUserByGoogleId(string googleId);
     }
 }

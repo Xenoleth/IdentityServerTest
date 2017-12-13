@@ -95,7 +95,8 @@ namespace AuthorizationServerV5.Mongo
                 {"walletId" , user.WalletId  ?? "default"},
                 {"transactionHistory" , new BsonArray {"asd", "zxc" }},
                 {"stripeCustomerId" , user.StripeCustomerId ?? "default"},
-                { "facebookId", user.FacebookId ?? "default" }
+                { "facebookId", user.FacebookId ?? "default" },
+                { "googleId", user.GoogleId ?? "default" }
             };
 
             await this.users.InsertOneAsync(document);
@@ -188,6 +189,17 @@ namespace AuthorizationServerV5.Mongo
             var filter = new BsonDocument()
             {
                 { "facebookId", facebookId }
+            };
+            var result = await this.users.Find(filter).ToListAsync();
+
+            return result;
+        }
+
+        public async Task<List<BsonDocument>> GetUserByGoogleId(string googleId)
+        {
+            var filter = new BsonDocument
+            {
+                { "googleId", googleId }
             };
             var result = await this.users.Find(filter).ToListAsync();
 
