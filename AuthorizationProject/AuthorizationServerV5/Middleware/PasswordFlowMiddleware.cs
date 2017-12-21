@@ -45,12 +45,12 @@ namespace AuthorizationServerV5.Middleware
             // Change username or password if they are empty
             if (body.Contains("username=&"))
             {
-                body = body.Replace("username=&", "username=AnonomysUser&");
+                body = body.Replace("username=&", "username=AnonymousUser&");
             }
 
             if (body.Contains("password=&"))
             {
-                body = body.Replace("password=&", "password=AnonomysPassword&");
+                body = body.Replace("password=&", "password=AnonymousPassword&");
             }
 
             var modifiedBody = new StringContent(body, Encoding.UTF8, "application/x-www-form-urlencoded");
