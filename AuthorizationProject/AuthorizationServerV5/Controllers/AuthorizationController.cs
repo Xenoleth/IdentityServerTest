@@ -5,6 +5,7 @@ using AuthorizationServerV5.External;
 using AuthorizationServerV5.Facebook;
 using AuthorizationServerV5.Mongo;
 using AuthorizationServerV5.Mongo.Contracts;
+using AuthorizationServerV5.Mongo.OpenIddictStores.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +57,27 @@ namespace AuthorizationServerV5.Controllers
             this.facebookService = new FacebookService();
         }
 
-        [HttpPost("~/connect/token"), Produces("application/json")]
+        [HttpGet("~/")]
+        public IActionResult Test()
+        {
+            return new JsonResult(new
+            {
+                Value1 = 5,
+                Value2 = 7
+            });
+        }
+
+        [HttpGet("~/api/Properties/rect")]
+        public IActionResult Test2()
+        {
+            return new JsonResult(new
+            {
+                Value1 = 5,
+                Value2 = 7
+            });
+        }
+
+        [HttpPost("~/token"), Produces("application/json")]
         public async Task<IActionResult> Exhange(OpenIdConnectRequest request)
         {
             if (request.IsPasswordGrantType())
@@ -69,13 +90,24 @@ namespace AuthorizationServerV5.Controllers
                 // using a time-constant comparer to prevent timing attacks.
                 var bsonUser = await this.dbContext.GetUser(request.Username);
 
-                var user = new PropyUser()
+                var user = new PropyUser();
+                if (bsonUser.Count == 0)
                 {
-                    Id = bsonUser[0]["_id"].ToString(),
-                    UserName = bsonUser[0]["UserName"].ToString(),
-                    PasswordHash = bsonUser[0]["PasswordHash"].ToString(),
-                    SecurityStamp = bsonUser[0]["SecurityStamp"].ToString()
-                };
+                    user.Id = Guid.NewGuid().ToString();
+                    user.UserName = "AnonUser";
+                    user.PasswordHash = "AnonPass";
+                    user.SecurityStamp = Guid.NewGuid().ToString();
+                }
+                else
+                {
+                    user = new PropyUser()
+                    {
+                        Id = bsonUser[0]["_id"].ToString(),
+                        UserName = bsonUser[0]["UserName"].ToString(),
+                        PasswordHash = bsonUser[0]["PasswordHash"].ToString(),
+                        SecurityStamp = bsonUser[0]["SecurityStamp"].ToString()
+                    };
+                }
 
                 // Check password hash
                 var hasher = new PasswordHasher<PropyUser>();
@@ -111,9 +143,9 @@ namespace AuthorizationServerV5.Controllers
                 var ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), OpenIdConnectServerDefaults.AuthenticationScheme);
                 ticket.SetScopes(new[]
 {
-                    //OpenIdConnectConstants.Scopes.OpenId,
-                    //OpenIdConnectConstants.Scopes.Email,
-                    //OpenIdConnectConstants.Scopes.Profile,
+                    OpenIdConnectConstants.Scopes.OpenId,
+                    OpenIdConnectConstants.Scopes.Email,
+                    OpenIdConnectConstants.Scopes.Profile,
                     OpenIdConnectConstants.Scopes.OfflineAccess,
                     //OpenIddictConstants.Scopes.Roles
                 }.Intersect(request.GetScopes()));

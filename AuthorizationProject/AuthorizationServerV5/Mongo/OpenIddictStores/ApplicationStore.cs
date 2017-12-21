@@ -89,17 +89,17 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
 
         public Task<string> GetClientIdAsync(TApplication application, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => application.ClientId);
         }
 
         public Task<string> GetClientSecretAsync(TApplication application, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => application.ClientSecret);
         }
 
         public Task<string> GetClientTypeAsync(TApplication application, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => "confidential");
         }
 
         public Task<string> GetDisplayNameAsync(TApplication application, CancellationToken cancellationToken)
@@ -109,7 +109,7 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
 
         public Task<string> GetIdAsync(TApplication application, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => application.Identifier);
         }
 
         public Task<ImmutableArray<string>> GetPostLogoutRedirectUrisAsync(TApplication application, CancellationToken cancellationToken)
@@ -158,6 +158,16 @@ namespace AuthorizationServerV5.Mongo.OpenIddictStores
         }
 
         public Task UpdateAsync(TApplication application, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Application> InstantiateAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new Application());
+        }
+
+        internal Task<TResult> GetAsync<TApplication, TState, TResult>(Func<IQueryable<TApplication>, TState, IQueryable<TResult>> query, TState state, CancellationToken cancellationToken) where TApplication : Application
         {
             throw new NotImplementedException();
         }

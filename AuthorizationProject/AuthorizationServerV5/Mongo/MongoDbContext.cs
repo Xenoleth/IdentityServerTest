@@ -102,6 +102,11 @@ namespace AuthorizationServerV5.Mongo
             await this.users.InsertOneAsync(document);
         }
 
+        //public async Task<string> GetClientSecret(Application app)
+        //{
+        //    return app.ClientSecret;
+        //}
+
         public async Task CreateRole(string role)
         {
             var document = new BsonDocument
